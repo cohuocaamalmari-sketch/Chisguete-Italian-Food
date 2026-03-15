@@ -47,27 +47,33 @@
         /* Custom inputs to match the older HTML look from the screenshot */
         .custom-input {
             border: 1px solid #a0a0a0;
-            padding: 4px 8px;
+            padding: 8px 12px;
             width: 250px;
             font-size: 0.9rem;
             color: #333;
             outline: none;
+            border-radius: 6px;
+            transition: all 0.3s ease;
         }
         .custom-input:focus {
             border-color: #6a1a1e;
+            box-shadow: 0 0 0 3px rgba(106, 26, 30, 0.2);
         }
         .custom-button {
             border: 1px solid #888;
             background-color: #f0f0f0;
-            padding: 4px 12px;
+            padding: 8px 16px;
+            border-radius: 6px;
             font-size: 0.85rem;
+            font-weight: 600;
             cursor: pointer;
             color: #333;
+            transition: all 0.3s ease;
         }
-        .custom-button:hover {
+        .custom-button:hover:not(:disabled) {
             background-color: #e0e0e0;
         }
-        .custom-button:active {
+        .custom-button:active:not(:disabled) {
             background-color: #d0d0d0;
         }
 
@@ -156,20 +162,20 @@
             <!-- The Form -->
             <form id="pedidoForm" class="flex flex-col items-center w-full" onsubmit="event.preventDefault(); generarExcel();">
                 
-                <select id="tipoPasta" class="custom-input mb-6" required>
+                <select id="tipoPasta" class="custom-input mb-6 bg-white cursor-pointer" required>
                     <option value="Alfredo">Alfredo</option>
                     <option value="Pesto">Pesto</option>
                     <option value="Putanesca">Putanesca</option>
                 </select>
 
                 <label for="nombre" class="font-serif-custom font-bold text-chisguete mb-1">Nombre</label>
-                <input type="text" id="nombre" placeholder="Nombre" class="custom-input mb-4" required>
+                <input type="text" id="nombre" placeholder="Nombre" class="custom-input mb-4 bg-white" required>
 
                 <label for="direccion" class="font-serif-custom font-bold text-chisguete mb-1">Dirección</label>
-                <input type="text" id="direccion" placeholder="Dirección" class="custom-input mb-4" required>
+                <input type="text" id="direccion" placeholder="Dirección" class="custom-input mb-4 bg-white" required>
 
                 <label for="telefono" class="font-serif-custom font-bold text-chisguete mb-1">Teléfono</label>
-                <input type="tel" id="telefono" placeholder="Teléfono" class="custom-input mb-6" required>
+                <input type="tel" id="telefono" placeholder="Teléfono" class="custom-input mb-6 bg-white" required>
 
                 <button type="submit" class="custom-button">Enviar Pedido</button>
             </form>
@@ -182,61 +188,49 @@
         By Cristina Cohuo
     </footer>
 
-    <!-- Toast Notification -->
+    <!-- Toast Notification (kept for structural integrity, but won't be triggered) -->
     <div id="toast">¡Pedido generado en Excel exitosamente!</div>
 
     <script>
+        // La función de Excel se mantiene en el código pero ya no es llamada 
+        // debido a que el botón y el formulario están deshabilitados.
         function generarExcel() {
-            // 1. Obtener los valores del formulario
             const pasta = document.getElementById('tipoPasta').value;
             const nombre = document.getElementById('nombre').value;
             const direccion = document.getElementById('direccion').value;
             const telefono = document.getElementById('telefono').value;
             const precio = "$185.00";
 
-            // Validar que los campos no estén vacíos
             if(!nombre || !direccion || !telefono) {
                 showToast("Por favor, llena todos los campos.", true);
                 return;
             }
 
-            // 2. Preparar los datos para el Excel (Arreglo de Arreglos)
             const datosExcel = [
-                ["Tipo de Pasta", "Nombre del Cliente", "Dirección de Entrega", "Teléfono", "Total a Pagar"], // Fila de Cabeceras
-                [pasta, nombre, direccion, telefono, precio] // Fila de Datos
+                ["Tipo de Pasta", "Nombre del Cliente", "Dirección de Entrega", "Teléfono", "Total a Pagar"],
+                [pasta, nombre, direccion, telefono, precio] 
             ];
 
-            // 3. Crear el libro y la hoja de cálculo usando SheetJS
             const libro = XLSX.utils.book_new();
             const hoja = XLSX.utils.aoa_to_sheet(datosExcel);
 
-            // Ajustar el ancho de las columnas para mejor legibilidad
             hoja['!cols'] = [
-                { wch: 15 }, // Pasta
-                { wch: 25 }, // Nombre
-                { wch: 35 }, // Dirección
-                { wch: 15 }, // Teléfono
-                { wch: 15 }  // Precio
+                { wch: 15 }, { wch: 25 }, { wch: 35 }, { wch: 15 }, { wch: 15 }
             ];
 
-            // Añadir la hoja al libro
             XLSX.utils.book_append_sheet(libro, hoja, "Pedido");
 
-            // 4. Generar y descargar el archivo
-            // Se le da un nombre dinámico usando el nombre del cliente
             const nombreArchivo = `Pedido_Chisguete_${nombre.replace(/\s+/g, '_')}.xlsx`;
             XLSX.writeFile(libro, nombreArchivo);
 
-            // 5. Mostrar mensaje de éxito y limpiar formulario
             showToast("¡Pedido generado en Excel exitosamente!");
             document.getElementById('pedidoForm').reset();
         }
 
-        // Función para mostrar un mensaje (toast) en lugar de un alert intrusivo
         function showToast(message, isError = false) {
             const toast = document.getElementById("toast");
             toast.textContent = message;
-            toast.style.backgroundColor = isError ? "#dc2626" : "#16a34a"; // Rojo para error, verde para éxito
+            toast.style.backgroundColor = isError ? "#dc2626" : "#16a34a"; 
             
             toast.className = "show";
             setTimeout(function(){ 
