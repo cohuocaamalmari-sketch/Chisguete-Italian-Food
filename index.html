@@ -1,1 +1,244 @@
 
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chisguete Italian Food - Realiza tu pedido</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- SheetJS for Excel generation -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.19.3/package/dist/xlsx.full.min.js"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Lora:ital,wght@0,500;0,700;1,700&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #f4f4f4; /* Left side background */
+        }
+        .font-cursive {
+            font-family: 'Great Vibes', cursive;
+        }
+        .font-serif-custom {
+            font-family: 'Lora', serif;
+        }
+        .text-chisguete {
+            color: #6a1a1e; /* Dark red/maroon from the image */
+        }
+        .glowing-image-container {
+            box-shadow: 0 0 30px 20px #f4f4f4 inset, 0 0 20px 10px rgba(255,255,255,0.9);
+            border-radius: 8px;
+            background: white;
+            padding: 4px;
+        }
+        
+        /* Custom styles for the pasta thumbnails */
+        .pasta-thumb-text {
+            font-family: 'Great Vibes', cursive;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+            font-size: 1.8rem;
+        }
+        .text-alfredo { color: #facc15; } /* Yellowish */
+        .text-pesto { color: #4ade80; } /* Green */
+        .text-putanesca { color: #f87171; } /* Redish */
+
+        /* Custom inputs to match the older HTML look from the screenshot */
+        .custom-input {
+            border: 1px solid #a0a0a0;
+            padding: 4px 8px;
+            width: 250px;
+            font-size: 0.9rem;
+            color: #333;
+            outline: none;
+        }
+        .custom-input:focus {
+            border-color: #6a1a1e;
+        }
+        .custom-button {
+            border: 1px solid #888;
+            background-color: #f0f0f0;
+            padding: 4px 12px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            color: #333;
+        }
+        .custom-button:hover {
+            background-color: #e0e0e0;
+        }
+        .custom-button:active {
+            background-color: #d0d0d0;
+        }
+
+        /* Toast Message */
+        #toast {
+            visibility: hidden;
+            min-width: 250px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 4px;
+            padding: 16px;
+            position: fixed;
+            z-index: 50;
+            left: 50%;
+            bottom: 30px;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.5s, visibility 0.5s;
+        }
+        #toast.show {
+            visibility: visible;
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center bg-gray-200">
+
+    <!-- Main Container -->
+    <div class="flex flex-col md:flex-row w-full max-w-6xl mx-auto bg-[#f4f4f4] shadow-2xl overflow-hidden min-h-[600px]">
+        
+        <!-- Left Column: Branding and Hero Image -->
+        <div class="w-full md:w-1/2 p-8 flex flex-col items-center justify-center relative">
+            
+            <!-- Logo area -->
+            <div class="text-center mb-8 flex flex-col items-center">
+                <!-- Abstract logo graphic (replacing the red yarn/ball) -->
+                <div class="w-8 h-8 rounded-full bg-gradient-to-br from-red-800 to-red-600 mb-2 flex items-center justify-center opacity-90" style="background-image: repeating-linear-gradient(45deg, transparent, transparent 2px, rgba(0,0,0,0.1) 2px, rgba(0,0,0,0.1) 4px);"></div>
+                <h1 class="text-3xl font-light text-gray-800 tracking-wide">Chisguete</h1>
+                <p class="text-xs text-gray-500 uppercase tracking-widest mt-1">Italian Food</p>
+            </div>
+
+            <!-- Hero Image with soft white glow effect -->
+            <div class="glowing-image-container relative z-10 w-full max-w-md">
+                <img src="https://images.unsplash.com/photo-1626844131082-256783844137?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
+                     alt="Plato de Spaghetti" 
+                     class="w-full h-auto object-cover rounded shadow-inner"
+                     style="max-height: 350px;">
+            </div>
+        </div>
+
+        <!-- Right Column: Order Form -->
+        <div class="w-full md:w-1/2 bg-white p-6 md:p-12 flex flex-col items-center shadow-[-10px_0_20px_rgba(0,0,0,0.05)] relative z-20">
+            
+            <h2 class="font-cursive text-5xl text-chisguete mb-2 mt-4">Realiza tu pedido</h2>
+            
+            <h3 class="font-serif-custom font-bold text-chisguete text-lg mb-6 uppercase tracking-wider">Selecciona la pasta</h3>
+            
+            <!-- Pasta Thumbnails -->
+            <div class="flex flex-row justify-center gap-2 mb-6 w-full max-w-md">
+                <!-- Alfredo -->
+                <div class="relative w-1/3 h-20 overflow-hidden border border-gray-200">
+                    <img src="https://images.unsplash.com/photo-1645112411341-6c4fd023714a?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80" alt="Alfredo" class="w-full h-full object-cover">
+                    <div class="absolute inset-0 flex items-center justify-center bg-black/20">
+                        <span class="pasta-thumb-text text-alfredo">Alfredo</span>
+                    </div>
+                </div>
+                <!-- Pesto -->
+                <div class="relative w-1/3 h-20 overflow-hidden border border-gray-200">
+                    <img src="https://images.unsplash.com/photo-1473093295043-cdd812d0e601?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80" alt="Pesto" class="w-full h-full object-cover">
+                    <div class="absolute inset-0 flex items-center justify-center bg-black/20">
+                        <span class="pasta-thumb-text text-pesto">Pesto</span>
+                    </div>
+                </div>
+                <!-- Putanesca -->
+                <div class="relative w-1/3 h-20 overflow-hidden border border-gray-200">
+                    <img src="https://images.unsplash.com/photo-1563379926898-05f4575a45d8?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80" alt="Putanesca" class="w-full h-full object-cover">
+                    <div class="absolute inset-0 flex items-center justify-center bg-black/20">
+                        <span class="pasta-thumb-text text-putanesca" style="font-size: 1.5rem;">Putanesca</span>
+                    </div>
+                </div>
+            </div>
+
+            <p class="font-serif-custom font-bold italic text-chisguete text-xl mb-6">Todas las pastas a $185.00</p>
+
+            <!-- The Form -->
+            <form id="pedidoForm" class="flex flex-col items-center w-full" onsubmit="event.preventDefault(); generarExcel();">
+                
+                <select id="tipoPasta" class="custom-input mb-6" required>
+                    <option value="Alfredo">Alfredo</option>
+                    <option value="Pesto">Pesto</option>
+                    <option value="Putanesca">Putanesca</option>
+                </select>
+
+                <label for="nombre" class="font-serif-custom font-bold text-chisguete mb-1">Nombre</label>
+                <input type="text" id="nombre" placeholder="Nombre" class="custom-input mb-4" required>
+
+                <label for="direccion" class="font-serif-custom font-bold text-chisguete mb-1">Dirección</label>
+                <input type="text" id="direccion" placeholder="Dirección" class="custom-input mb-4" required>
+
+                <label for="telefono" class="font-serif-custom font-bold text-chisguete mb-1">Teléfono</label>
+                <input type="tel" id="telefono" placeholder="Teléfono" class="custom-input mb-6" required>
+
+                <button type="submit" class="custom-button">Enviar Pedido</button>
+            </form>
+
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast">¡Pedido generado en Excel exitosamente!</div>
+
+    <script>
+        function generarExcel() {
+            // 1. Obtener los valores del formulario
+            const pasta = document.getElementById('tipoPasta').value;
+            const nombre = document.getElementById('nombre').value;
+            const direccion = document.getElementById('direccion').value;
+            const telefono = document.getElementById('telefono').value;
+            const precio = "$185.00";
+
+            // Validar que los campos no estén vacíos
+            if(!nombre || !direccion || !telefono) {
+                showToast("Por favor, llena todos los campos.", true);
+                return;
+            }
+
+            // 2. Preparar los datos para el Excel (Arreglo de Arreglos)
+            const datosExcel = [
+                ["Tipo de Pasta", "Nombre del Cliente", "Dirección de Entrega", "Teléfono", "Total a Pagar"], // Fila de Cabeceras
+                [pasta, nombre, direccion, telefono, precio] // Fila de Datos
+            ];
+
+            // 3. Crear el libro y la hoja de cálculo usando SheetJS
+            const libro = XLSX.utils.book_new();
+            const hoja = XLSX.utils.aoa_to_sheet(datosExcel);
+
+            // Ajustar el ancho de las columnas para mejor legibilidad
+            hoja['!cols'] = [
+                { wch: 15 }, // Pasta
+                { wch: 25 }, // Nombre
+                { wch: 35 }, // Dirección
+                { wch: 15 }, // Teléfono
+                { wch: 15 }  // Precio
+            ];
+
+            // Añadir la hoja al libro
+            XLSX.utils.book_append_sheet(libro, hoja, "Pedido");
+
+            // 4. Generar y descargar el archivo
+            // Se le da un nombre dinámico usando el nombre del cliente
+            const nombreArchivo = `Pedido_Chisguete_${nombre.replace(/\s+/g, '_')}.xlsx`;
+            XLSX.writeFile(libro, nombreArchivo);
+
+            // 5. Mostrar mensaje de éxito y limpiar formulario
+            showToast("¡Pedido generado en Excel exitosamente!");
+            document.getElementById('pedidoForm').reset();
+        }
+
+        // Función para mostrar un mensaje (toast) en lugar de un alert intrusivo
+        function showToast(message, isError = false) {
+            const toast = document.getElementById("toast");
+            toast.textContent = message;
+            toast.style.backgroundColor = isError ? "#dc2626" : "#16a34a"; // Rojo para error, verde para éxito
+            
+            toast.className = "show";
+            setTimeout(function(){ 
+                toast.className = toast.className.replace("show", ""); 
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
